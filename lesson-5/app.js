@@ -1,6 +1,54 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const morgan = require('morgan');
+const mongoose = require('mongoose');
+const Blog = require('./models/Blog');
+
+mongoose
+  .connect(process.env.MONGO_DB, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    app.listen(3000, () => {
+      console.log('listening on port 3000');
+    });
+    console.log('connected to db');
+  })
+  .catch((err) => {
+    console.log('db connection failed: ', err);
+  });
+
+app.get('/add-blog', (req, res, next) => {
+  const blog = new Blog({
+    title: 'new blog 2',
+    snippet: ' about my blog',
+    body: 'more about my blog',
+  });
+
+  blog
+    .save()
+    .then((result) => {
+      res.send(result);
+    })
+    .catch((e) => console.log(e));
+});
+app.get('/all-blogs', (req, res, next) => {
+  Blog.find()
+    .then((result) => {
+      res.status(200).json(result);
+    })
+    .catch((e) => res.status(500).json({ error: e }));
+});
+app.get('/single-blog/:id', (req, res, next) => {
+  console.log(req.params.id);
+  Blog.findById(req.params.id)
+    .then((result) => {
+      res.status(200).json(result);
+    })
+    .catch((e) => res.status(500).json({ error: e }));
+});
 
 // register view engine
 app.set('view engine', 'ejs');
@@ -10,30 +58,30 @@ app.use(express.static('public'));
 
 app.use(morgan('dev'));
 
-// app.use((req, res, next) => {
-//   console.log('new request made');
-//   console.log('hostname: ', req.hostname);
-//   console.log('path: ', req.path);
-//   console.log('method: ', req.method);
-//   next();
-// });
-
 app.get('/', (req, res, next) => {
-  const blogs = [
-    { title: 'Running', snippet: 'Lorem ipsum dolor sit amet consectetur.' },
-    { title: 'Jumping', snippet: 'Lorem ipsum dolor sit amet consectetur.' },
-    { title: 'Walking', snippet: 'Lorem ipsum dolor sit amet consectetur.' },
-  ];
-  res.render('index', {
-    title: 'Home',
-    blogs,
-  });
+  res.redirect('/blogs');
 });
 
 app.get('/about', (req, res, next) => {
   res.render('about', {
     title: 'About',
   });
+});
+
+// blog routes
+
+app.get('/blogs', (req, res, next) => {
+  Blog.find()
+    .sort({ createdAt: -1 })
+    .then((result) => {
+      res.render('index', {
+        title: 'All Blogs',
+        blogs: result,
+      });
+    })
+    .catch((err) => {
+      console.log({ error: err });
+    });
 });
 
 app.get('/blogs/create', (req, res, next) => {
@@ -47,8 +95,4 @@ app.use((req, res, next) => {
   res.status(404).render('404', {
     title: '404',
   });
-});
-
-app.listen(3000, () => {
-  console.log('listening on port 3000');
 });
