@@ -1,15 +1,24 @@
 const express = require('express');
-const { RSA_NO_PADDING } = require('constants');
 const app = express();
+const morgan = require('morgan');
 
 // register view engine
 app.set('view engine', 'ejs');
 // app.set('views', 'newviewslocation'); // if you want to change the location of the views
 
+app.use(express.static('public'));
+
+app.use(morgan('dev'));
+
+// app.use((req, res, next) => {
+//   console.log('new request made');
+//   console.log('hostname: ', req.hostname);
+//   console.log('path: ', req.path);
+//   console.log('method: ', req.method);
+//   next();
+// });
+
 app.get('/', (req, res, next) => {
-  // res.send('<p>index.html</p>');
-  // console.log(__dirname);
-  // res.sendFile('./views/index.html', { root: __dirname });
   const blogs = [
     { title: 'Running', snippet: 'Lorem ipsum dolor sit amet consectetur.' },
     { title: 'Jumping', snippet: 'Lorem ipsum dolor sit amet consectetur.' },
@@ -22,17 +31,9 @@ app.get('/', (req, res, next) => {
 });
 
 app.get('/about', (req, res, next) => {
-  // res.send('<p>about.html</p>');
-  // console.log(__dirname);
-  // res.sendFile('./views/about.html', { root: __dirname });
   res.render('about', {
     title: 'About',
   });
-});
-
-// redirect
-app.get('/about-us', (req, res, next) => {
-  res.redirect('/about');
 });
 
 app.get('/blogs/create', (req, res, next) => {
@@ -43,7 +44,6 @@ app.get('/blogs/create', (req, res, next) => {
 
 // 404 page
 app.use((req, res, next) => {
-  // res.status(404).sendFile('./views/404.html', { root: __dirname });
   res.status(404).render('404', {
     title: '404',
   });
