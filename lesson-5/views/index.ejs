@@ -1,22 +1,20 @@
+<%- include('./_partials/header.ejs') %> <%- include('./_partials/nav.ejs')%>
 
-    <%- include('./_partials/header.ejs') %> 
-    
-    <%- include('./_partials/nav.ejs')%>
+<div class="blogs content">
+  <h2>All blogs</h2>
+  <% if (blogs.length) { %> <% blogs.forEach(blog => { %> <% const { title,
+  snippet } = blog %>
 
-    <div class="blogs content">
-      <h2>All blogs</h2>
-      <% if (blogs.length) { %> <% blogs.forEach(blog => { %> <% const { title,
-      snippet } = blog %>
+  <a class="single" href="/blogs/<%= blog._id %>">
+    <h3 class="title"><%= title %></h3>
+    <p class="snippet"><%= snippet %></p>
+  </a>
 
-      <h3 class="title"><%= title %></h3>
+  <% }) %> <% } else { %>
 
-      <p class="snippet"><%= snippet %></p>
+  <p>No blogs to display</p>
 
-      <% }) %> <% } else { %>
+  <% } %>
+</div>
 
-      <p>No blogs to display</p>
-
-      <% } %>
-    </div>
-
-    <%- include('./_partials/footer.ejs') %>
+<%- include('./_partials/footer.ejs') %>
